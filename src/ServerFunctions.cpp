@@ -73,53 +73,10 @@ void parseResponse(int numservers, String queries[], String server_output[],Anal
                 server_output[i] = "<set,slider," + (String(num)) + ",position," + String(_filter.nextposition) + ">" + "\r\n";
             }else if (parameter == "counter")
             {
-                switch (num)
-                {
-                case 0:
-                    command = strtok(NULL, ",");
-                    avgcount.sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
-                    setmovingavg(num,avgcount);
-                    break;
-
-                case 1:
-                    command = strtok(NULL, ",");
-                    avgcount.sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
-                    setmovingavg(num,avgcount);
-                    break;
-
-                case 2:
-                    command = strtok(NULL, ",");
-                    avgcount.sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
-                    setmovingavg(num,avgcount);
-                    break;
-
-                case 3:
-                    command = strtok(NULL, ",");
-                    avgcount.sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
-                    setmovingavg(num,avgcount);
-                    break;
-
-                case 4:
-                    command = strtok(NULL, ",");
-                    avgcount.sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
-                    setmovingavg(num,avgcount);
-                    break;
-
-                case 5:
-                     command = strtok(NULL, ",");
-                    avgcount.sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
-                    setmovingavg(num,avgcount);
-                    break;
-
-                default:
-                    break;
-                }
+                command = strtok(NULL, ",");
+                avgcount.sizeavg[num] = String(command).toInt();
+                EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
+                updatemovingavgArray(num,avgcount);
                 server_output[i] = "<set,counter," + (String(num)) + ",avg," + String(avgcount.sizeavg[num]) + ">" + "\n\r";
             }
         }

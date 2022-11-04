@@ -35,6 +35,7 @@ struct AVGCount
   uint16_t movingaverage2[60];
   uint16_t movingaverage3[60];
   uint16_t movingaverage4[60];
+  uint16_t movingaverages[60][NUMCOUNTERS];
   uint16_t total[NUMCOUNTERS] = {0, 0, 0, 0};  //array to fill with the sum of all current moving average to be divided by sizeavg
   uint16_t readIndex[NUMCOUNTERS] = {0, 0, 0, 0}; //reading index old values
   uint16_t listfreqavg[NUMCOUNTERS] = {0, 0, 0, 0};  //freq average after smooth fucnton

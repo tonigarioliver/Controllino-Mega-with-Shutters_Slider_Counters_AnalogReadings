@@ -108,7 +108,7 @@ void setup()
   delay(2000);
   for (int i = 0; i < NUMCOUNTERS; i++)
   {
-    setmovingavg(i, avgCounters);
+    updatemovingavgArray(i, avgCounters);
   }
 }
 //////////////////////////////////////////////////////////////
@@ -128,58 +128,17 @@ void loop()
   }
 
   readanaloginputs(Analog);
+  analogAVG(Analog);
 
-  if (millis() - Analog.timeanalog > Analog.freqanalogread)
-  {
-    Serial.print("Average Analogs->");
-    for (int i = 0; i < analogInputs; i++)
-    {
-      Analog.prevAnalogReadings[i] = (Analog.AnalogReadings[i]) / Analog.numAnalogReadings;
-      Serial.print("Analog num " + String(i) + ": " + Analog.prevAnalogReadings[i] + " ");
-      Analog.AnalogReadings[i] = 0;
-    }
-    Serial.println();
-    Analog.numAnalogReadings = 0;
-    Analog.timeanalog = millis();
-  }
-
-  if (millis() - Counters.timmerfreq > timefreq)
-  {
-    Ethernet.maintain();
-    Serial.print("Average frequencies->");
-    for (int i = 0; i < NUMCOUNTERS; i++)
-    {
-      Counters.listfreq[i] = uint16_t((Counters.listpulses[i] - Counters.listpulses_before[i]));
-      Counters.listpulses_before[i] = Counters.listpulses[i];
-      avgCounters.listfreqavg[i] = smooth(i, Counters, avgCounters);
-      Serial.print("Counter num " + String(i) + ": " + avgCounters.listfreqavg[i] + " ");
-    }
-    Serial.println();
-    Counters.timmerfreq = millis();
-  }
+  countersAVG(Counters,avgCounters);
 
   timmershutterState(shutters);                         // to check high output state
-  bool newupdateShutter = checkShuttersState(shutters); // new updates
-  if (newupdateShutter)
+   // new updates
+  if (checkShuttersState(shutters))
   {
-    for (int i = 0; i < NUM_SHUTTERS; i++)
-    {
-      if (shutters.newstates[i] == true)
-      {
-        shutters.newstates[i] = false;
-        if (shutters.AnalogOldState[i] == HIGH)
-        {
-          moveShutter(i, FORWARDS);
-        }
-        else
-        {
-          moveShutter(i, BACKWARDS);
-        }
-        Serial.print("Value shutter first" + String(i) + ":" + String(digitalRead(CONTROLLINO_D0 + i)));
-        Serial.println("Value shutter second" + String(i) + ":" + String(digitalRead(CONTROLLINO_D0 + i + 1)));
-      }
-    }
+    moveShutters(shutters);
   }
+  
   /// testing part///
   if (shutters.test != digitalRead(CONTROLLINO_A9))
   {

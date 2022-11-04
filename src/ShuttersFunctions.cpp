@@ -46,21 +46,42 @@ bool checkShuttersState(Shutters &_shutters)
 }
 void moveShutter(int _shutter, enum shutter_direction dir)
 {
-    digitalWrite(CONTROLLINO_D0 + _shutter*2, LOW);
-    digitalWrite(CONTROLLINO_D0 + _shutter*2 + 1, LOW);
+    digitalWrite(CONTROLLINO_D0 + _shutter * 2, LOW);
+    digitalWrite(CONTROLLINO_D0 + _shutter * 2 + 1, LOW);
 
     switch (dir)
     {
     case BACKWARDS:
-        digitalWrite(CONTROLLINO_D0 + _shutter*2, HIGH);
+        digitalWrite(CONTROLLINO_D0 + _shutter * 2, HIGH);
         break;
     case FORWARDS:
-        digitalWrite(CONTROLLINO_D0 + _shutter*2 + 1, HIGH);
+        digitalWrite(CONTROLLINO_D0 + _shutter * 2 + 1, HIGH);
         break;
     default:
         Serial.println("Default");
-        digitalWrite(CONTROLLINO_D0 + _shutter*2, LOW);
-        digitalWrite(CONTROLLINO_D0 + _shutter*2 + 1, LOW);
+        digitalWrite(CONTROLLINO_D0 + _shutter * 2, LOW);
+        digitalWrite(CONTROLLINO_D0 + _shutter * 2 + 1, LOW);
         break;
+    }
+}
+
+void moveShutters(Shutters &_shutters)
+{
+    for (int i = 0; i < NUM_SHUTTERS; i++)
+    {
+        if (_shutters.newstates[i] == true)
+        {
+            _shutters.newstates[i] = false;
+            if (_shutters.AnalogOldState[i] == HIGH)
+            {
+                moveShutter(i, FORWARDS);
+            }
+            else
+            {
+                moveShutter(i, BACKWARDS);
+            }
+            Serial.print("Value shutter first" + String(i) + ":" + String(digitalRead(CONTROLLINO_D0 + i)));
+            Serial.println("Value shutter second" + String(i) + ":" + String(digitalRead(CONTROLLINO_D0 + i + 1)));
+        }
     }
 }

@@ -3,122 +3,48 @@
 #include "CountersFunctions.h"
 #include "EEPROMFunctions.h"
 
-
-uint32_t smooth(int numcounter, Count &counters,AVGCount &avgcount)
-{ /* function smooth */
-    ////Perform average on sensor readings
-    uint32_t average;
-    // subtract the last reading:
-    switch (numcounter)
+void countersAVG(Count &counters,AVGCount &avgcount){
+  if (millis() - counters.timmerfreq > timefreq)
+  {
+    //Ethernet.maintain();
+    Serial.print("Average frequencies->");
+    for (int i = 0; i < NUMCOUNTERS; i++)
     {
-    case 0:
-        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage1[avgcount.readIndex[numcounter]]; //deleting the previous value if is 0 is start nothign to delete 
-                                                                                                                          // the first time we fill the array:
-        avgcount.movingaverage1[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
-        // add value to total:
-        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage1[avgcount.readIndex[numcounter]];
-        // handle index
-        avgcount.readIndex[numcounter]++;
-        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter]) //checking if my reading has reach my limit of moving average
-        {
-            avgcount.readIndex[numcounter] = 0;
-        }
-        break;
-
-    case 1:
-        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage2[avgcount.readIndex[numcounter]];
-        // read the sensor:
-        avgcount.movingaverage2[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
-        // add value to total:
-        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage2[avgcount.readIndex[numcounter]];
-        // handle index
-        avgcount.readIndex[numcounter]++;
-        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
-        {
-            avgcount.readIndex[numcounter] = 0;
-        }
-        break;
-
-    case 2:
-        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage3[avgcount.readIndex[numcounter]];
-        // read the sensor:
-        avgcount.movingaverage3[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
-        // add value to total:
-        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage3[avgcount.readIndex[numcounter]];
-        // handle index
-        avgcount.readIndex[numcounter]++;
-        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
-        {
-            avgcount.readIndex[numcounter] = 0;
-        }
-        break;
-
-    case 3:
-        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage4[avgcount.readIndex[numcounter]];
-        // read the sensor:
-        avgcount.movingaverage4[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
-        // add value to total:
-        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage4[avgcount.readIndex[numcounter]];
-        // handle index
-        avgcount.readIndex[numcounter]++;
-        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
-        {
-            avgcount.readIndex[numcounter] = 0;
-        }
-        break;
-    default:
-        break;
+      counters.listfreq[i] = uint16_t((counters.listpulses[i] - counters.listpulses_before[i]));
+      counters.listpulses_before[i] = counters.listpulses[i];
+      avgcount.listfreqavg[i] = smoothCounterFrequencies(i, counters, avgcount);
+      Serial.print("Counter num " + String(i) + ": " + avgcount.listfreqavg[i] + " ");
     }
-    // calculate the average:
+    Serial.println();
+    counters.timmerfreq = millis();
+  }
+}
+
+
+uint32_t smoothCounterFrequencies(int numcounter, Count &counters,AVGCount &avgcount){
+    uint32_t average;
+    avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverages[avgcount.readIndex[numcounter]][numcounter]; //deleting the previous value if is 0 is start nothign to delete 
+                                                                                                                        // the first time we fill the array:
+    avgcount.movingaverages[avgcount.readIndex[numcounter]][numcounter] = counters.listfreq[numcounter];
+    // add value to total:
+    avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverages[avgcount.readIndex[numcounter]][numcounter];
+    // handle index
+    avgcount.readIndex[numcounter]++;
+    if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter]) //checking if my reading has reach my limit of moving average
+    {
+        avgcount.readIndex[numcounter] = 0;
+    }
     average = avgcount.total[numcounter] / avgcount.sizeavg[numcounter]; //computes average from all the previous divide by the size
 
     return average;
 }
 
-void setmovingavg(int numcounter,AVGCount &avgcount)
-{
-    switch (numcounter)
-    {
-    case 0:
+void updatemovingavgArray(int numcounter,AVGCount &avgcount){
         avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
         avgcount.readIndex[numcounter] = 0;
         avgcount.total[numcounter] = 0;
         for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
         {
-            avgcount.movingaverage1[i] = 0;
+            avgcount.movingaverages[i][numcounter] = 0;
         }
-        break;
-
-    case 1:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage2[i] = 0;
-        }
-        break;
-
-    case 2:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage3[i] = 0;
-        }
-        break;
-
-    case 3:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage4[i] = 0;
-        }
-        break;
-    default:
-        break;
-    }
 }
