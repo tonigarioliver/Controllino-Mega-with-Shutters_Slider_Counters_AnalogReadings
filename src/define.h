@@ -1,5 +1,5 @@
 // Pulses define
-#define NUMCOUNTERS 6
+#define NUMCOUNTERS 4
 #define timefreq 1000
 #define DUTYCYCLE 127 //(0-255)
 #define longEEPROM 4
@@ -8,14 +8,14 @@
 
 
 struct Count{
-  volatile unsigned long listpulses[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-  unsigned long listpulses_before[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-  uint16_t listfreq[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
+  volatile unsigned long listpulses[NUMCOUNTERS] = {0, 0, 0, 0};
+  unsigned long listpulses_before[NUMCOUNTERS] = {0, 0, 0, 0};
+  uint16_t listfreq[NUMCOUNTERS] = {0, 0, 0, 0};
   unsigned long timmerfreq = 0;
 };
 
 struct AVGCount{
-    uint16_t sizeavg[NUMCOUNTERS] = {10, 10, 10, 10, 10, 10};
+    uint16_t sizeavg[NUMCOUNTERS] = {10, 10, 10, 10};
     uint16_t movingaverage1[60];
     uint16_t movingaverage2[60];
     uint16_t movingaverage3[60];
@@ -23,9 +23,9 @@ struct AVGCount{
     uint16_t movingaverage5[60];
     uint16_t movingaverage6[60];
 
-    uint16_t total[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-    uint16_t readIndex[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-    uint16_t listfreqavg[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
+    uint16_t total[NUMCOUNTERS] = {0, 0, 0, 0};
+    uint16_t readIndex[NUMCOUNTERS] = {0, 0, 0, 0};
+    uint16_t listfreqavg[NUMCOUNTERS] = {0, 0, 0, 0};
 };
 
 struct AnalogReadings{

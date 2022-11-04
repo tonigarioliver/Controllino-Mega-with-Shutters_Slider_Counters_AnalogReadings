@@ -22,28 +22,22 @@ String *serveroutput;
 
 ///// AnalogReadings 
 AnalogReadings Analog;
+////Struct for Pulse Counter
+Count Counters;
+///Struct for Moving Average for Counters
+AVGCount avgCounters;
 
 /////InterruptionCounters
 const byte count1 = CONTROLLINO_IN0;
 const byte count2 = CONTROLLINO_IN1;
-const byte count3 = CONTROLLINO_D0;
-const byte count4 = CONTROLLINO_D1;
-const byte count5 = CONTROLLINO_PIN_HEADER_SCL;
-const byte count6 = CONTROLLINO_PIN_HEADER_SDA;
+const byte count3 = CONTROLLINO_PIN_HEADER_SCL;
+const byte count4 = CONTROLLINO_PIN_HEADER_SDA;
 
 const byte pulse1 = CONTROLLINO_D2;
 const byte pulse2 = CONTROLLINO_D3;
 const byte pulse3 = CONTROLLINO_D4;
 const byte pulse4 = CONTROLLINO_D5;
-const byte pulse5 = CONTROLLINO_D6;
-const byte pulse6 = CONTROLLINO_D7;
 
-
-////Struct for Pulse Counter
-Count Counters;
-
-///Struct for Moving Average for Counters
-AVGCount avgCounters;
 ///////////ISRs COUNTERS
 void counter1()
 {
@@ -61,14 +55,7 @@ void counter4()
 {
   Counters.listpulses[3]++;
 }
-void counter5()
-{
-  Counters.listpulses[4]++;
-}
-void counter6()
-{
-  Counters.listpulses[5]++;
-}
+
 
 /////////////////////////////////////////////////////////////////
 void setpulses(int dutycycle)
@@ -77,14 +64,10 @@ void setpulses(int dutycycle)
   pinMode(pulse2, OUTPUT);
   pinMode(pulse3, OUTPUT);
   pinMode(pulse4, OUTPUT);
-  pinMode(pulse5, OUTPUT);
-  pinMode(pulse6, OUTPUT);
   analogWrite(pulse1, dutycycle);
   analogWrite(pulse2, dutycycle);
   analogWrite(pulse3, dutycycle);
   analogWrite(pulse4, dutycycle);
-  analogWrite(pulse5, dutycycle);
-  analogWrite(pulse6, dutycycle);
 }
 ////////////////////////////////////////////
 void pinmodeCountersSetup()
@@ -93,14 +76,11 @@ void pinmodeCountersSetup()
   pinMode(count2, INPUT_PULLUP);
   pinMode(count3, INPUT_PULLUP);
   pinMode(count4, INPUT_PULLUP);
-  pinMode(count5, INPUT_PULLUP);
-  pinMode(count6, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(count1), counter1, FALLING);
   attachInterrupt(digitalPinToInterrupt(count2), counter2, FALLING);
   attachInterrupt(digitalPinToInterrupt(count3), counter3, FALLING);
   attachInterrupt(digitalPinToInterrupt(count4), counter4, FALLING);
-  attachInterrupt(digitalPinToInterrupt(count5), counter5, FALLING);
-  attachInterrupt(digitalPinToInterrupt(count6), counter6, FALLING);
+
 }
 
 /////////////////////////////////////////////////////////////////
