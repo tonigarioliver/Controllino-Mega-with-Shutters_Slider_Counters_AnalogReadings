@@ -6,6 +6,8 @@
 #include "AnalogInputsFunctions.h"
 #include "ServerFunctions.h"
 #include <EthernetServers.h>
+#include "CountersFunctions.h"
+
 
 ////////////////Ethernet MAC for DHCP
 uint8_t mac[] = {0xA8, 0x61, 0x0A, 0xAE, 0x7B, 0x79};
@@ -85,7 +87,7 @@ void setpulses(int dutycycle)
   analogWrite(pulse6, dutycycle);
 }
 ////////////////////////////////////////////
-void pinmodeSetup()
+void pinmodeCountersSetup()
 {
   pinMode(count1, INPUT_PULLUP);
   pinMode(count2, INPUT_PULLUP);
@@ -99,16 +101,6 @@ void pinmodeSetup()
   attachInterrupt(digitalPinToInterrupt(count4), counter4, FALLING);
   attachInterrupt(digitalPinToInterrupt(count5), counter5, FALLING);
   attachInterrupt(digitalPinToInterrupt(count6), counter6, FALLING);
-  pinMode(CONTROLLINO_A0, INPUT);
-  pinMode(CONTROLLINO_A1, INPUT);
-  pinMode(CONTROLLINO_A2, INPUT);
-  pinMode(CONTROLLINO_A3, INPUT);
-  pinMode(CONTROLLINO_A4, INPUT);
-  pinMode(CONTROLLINO_A5, INPUT);
-  pinMode(CONTROLLINO_A6, INPUT);
-  pinMode(CONTROLLINO_A7, INPUT);
-  pinMode(CONTROLLINO_A8, INPUT);
-  pinMode(CONTROLLINO_A9, INPUT);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -117,7 +109,8 @@ void setup()
 {
   Serial.begin(115200);
   delay(2000);
-  pinmodeSetup();
+  pinmodeCountersSetup();
+  pinmodeAnalogSetup();
   setpulses(DUTYCYCLE);
   Servers.startServers(servers, mac, ip);
   delay(2000);

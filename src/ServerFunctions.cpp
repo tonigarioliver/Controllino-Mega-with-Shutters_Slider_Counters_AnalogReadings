@@ -2,77 +2,9 @@
 #include "EEPROMFunctions.h"
 #include "define.h"
 #include "ServerFunctions.h"
+#include "CountersFunctions.h"
 
 ////////////////////////
-void setmovingavg(int numcounter,AVGCount &avgcount)
-{
-    switch (numcounter)
-    {
-    case 0:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage1[i] = 0;
-        }
-        break;
-
-    case 1:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage2[i] = 0;
-        }
-        break;
-
-    case 2:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage3[i] = 0;
-        }
-        break;
-
-    case 3:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage4[i] = 0;
-        }
-        break;
-
-    case 4:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage5[i] = 0;
-        }
-        break;
-
-    case 5:
-        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        avgcount.readIndex[numcounter] = 0;
-        avgcount.total[numcounter] = 0;
-        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
-        {
-            avgcount.movingaverage6[i] = 0;
-        }
-        break;
-
-    default:
-        break;
-    }
-}
-
 void parseResponse(int numservers, String queries[], String server_output[],AnalogReadings &_Analog, Count &counters,AVGCount &avgcount)
 {
     for (int i = 0; i < numservers; i++)

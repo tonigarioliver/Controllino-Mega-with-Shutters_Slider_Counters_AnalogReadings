@@ -6,6 +6,7 @@
 #define analogInputs 8
 #define voltatgeSupply 0.0147
 
+
 struct Count{
   volatile unsigned long listpulses[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
   unsigned long listpulses_before[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
