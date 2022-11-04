@@ -10,7 +10,6 @@
 #include "ShuttersFunctions.h"
 #include "SliderFunctions.h"
 
-
 ////////////////Ethernet MAC for DHCP
 uint8_t mac[] = {0xA8, 0x61, 0x0A, 0xAE, 0x7B, 0x79};
 byte ip[] = {192, 168, 100, 27};
@@ -22,15 +21,15 @@ int numServers = sizeof(servers) / sizeof(servers[0]);
 EthernetServers Servers(buffersize, numServers);
 String *serveroutput;
 
-///// AnalogReadings 
+///// AnalogReadings
 AnalogReadings Analog;
 ////Struct for Pulse Counter
 Count Counters;
-///Struct for Moving Average for Counters
+/// Struct for Moving Average for Counters
 AVGCount avgCounters;
 
 // Struct shutters
-
+Shutters shutters;
 /// Struct slider
 Slider SliderFilter;
 
@@ -42,14 +41,6 @@ const byte count4 = CONTROLLINO_PIN_HEADER_SDA;
 /**testing*/
 const byte pulse1 = CONTROLLINO_D15;
 ////////////////////////////////////////////////////////////////
-volatile bool AnalogState[NUM_SHUTTERS] = {LOW, LOW, LOW, LOW, LOW};
-volatile bool AnalogOldState[NUM_SHUTTERS] = {LOW, LOW, LOW, LOW, LOW};
-bool newstates[NUM_SHUTTERS] = {false,false,false,false,false};
-int dir = 0;
-unsigned long timmer = 0;
-unsigned long timmershutters = 0;
-int test = LOW;
-
 
 ///////////ISRs COUNTERS
 void counter1()
@@ -73,10 +64,10 @@ ISR(PCINT2_vect)
 {
   for (int i = 0; i < NUM_SHUTTERS; i++)
   {
-    if (digitalRead(CONTROLLINO_A8 + i) != AnalogState[i])
+    if (digitalRead(CONTROLLINO_A8 + i) != shutters.AnalogState[i])
     {
       // Pin D2 triggered the ISR on a Falling pulse
-      AnalogState[i] =! AnalogState[i];
+      shutters.AnalogState[i] = !shutters.AnalogState[i];
     }
   }
 }
@@ -88,6 +79,7 @@ void setpulses(int dutycycle)
   pinMode(CONTROLLINO_D16, OUTPUT);
   digitalWrite(CONTROLLINO_D16, HIGH);
 }
+
 ////////////////////////////////////////////
 void pinmodeCountersSetup()
 {
@@ -99,7 +91,6 @@ void pinmodeCountersSetup()
   attachInterrupt(digitalPinToInterrupt(count2), counter2, FALLING);
   attachInterrupt(digitalPinToInterrupt(count3), counter3, FALLING);
   attachInterrupt(digitalPinToInterrupt(count4), counter4, FALLING);
-
 }
 
 /////////////////////////////////////////////////////////////////
@@ -120,18 +111,18 @@ void setup()
     setmovingavg(i, avgCounters);
   }
 }
-
+//////////////////////////////////////////////////////////////
 void loop()
 {
   SliderFilter.motionstatus = digitalRead(inMotion);
-  
+
   query = Servers.servermsgreceive(servers);
 
   if (Servers.existnewMessage())
   {
     delete[] serveroutput;
     serveroutput = new String[numServers];
-    parseResponse(numServers, query, serveroutput, Analog, Counters, avgCounters,SliderFilter);
+    parseResponse(numServers, query, serveroutput, Analog, Counters, avgCounters, SliderFilter);
     Servers.sendreply(servers, serveroutput);
     moveSliderFilter(SliderFilter);
   }
@@ -144,7 +135,7 @@ void loop()
     for (int i = 0; i < analogInputs; i++)
     {
       Analog.prevAnalogReadings[i] = (Analog.AnalogReadings[i]) / Analog.numAnalogReadings;
-      Serial.print("Analog num "+String(i)+": "+Analog.prevAnalogReadings[i]+" ");
+      Serial.print("Analog num " + String(i) + ": " + Analog.prevAnalogReadings[i] + " ");
       Analog.AnalogReadings[i] = 0;
     }
     Serial.println();
@@ -161,22 +152,22 @@ void loop()
       Counters.listfreq[i] = uint16_t((Counters.listpulses[i] - Counters.listpulses_before[i]));
       Counters.listpulses_before[i] = Counters.listpulses[i];
       avgCounters.listfreqavg[i] = smooth(i, Counters, avgCounters);
-      Serial.print("Counter num "+String(i)+": "+avgCounters.listfreqavg[i] +" ");
+      Serial.print("Counter num " + String(i) + ": " + avgCounters.listfreqavg[i] + " ");
     }
     Serial.println();
     Counters.timmerfreq = millis();
   }
 
-  timmershutterState(timmershutters);                                      // to check high output state
-  bool newupdateShutter = checkShuttersState(AnalogState, AnalogOldState,newstates); // new updates
+  timmershutterState(shutters);                         // to check high output state
+  bool newupdateShutter = checkShuttersState(shutters); // new updates
   if (newupdateShutter)
   {
     for (int i = 0; i < NUM_SHUTTERS; i++)
     {
-      if (newstates[i] == true)
+      if (shutters.newstates[i] == true)
       {
-        newstates[i] = false;
-        if(AnalogOldState[i] == HIGH)
+        shutters.newstates[i] = false;
+        if (shutters.AnalogOldState[i] == HIGH)
         {
           moveShutter(i, FORWARDS);
         }
@@ -184,17 +175,19 @@ void loop()
         {
           moveShutter(i, BACKWARDS);
         }
-        Serial.print("Value shutter first"+ String(i)+":" +String(digitalRead(CONTROLLINO_D0 + i)));
-        Serial.println("Value shutter second"+ String(i)+":" +String(digitalRead(CONTROLLINO_D0 + i+1)));
+        Serial.print("Value shutter first" + String(i) + ":" + String(digitalRead(CONTROLLINO_D0 + i)));
+        Serial.println("Value shutter second" + String(i) + ":" + String(digitalRead(CONTROLLINO_D0 + i + 1)));
       }
     }
   }
   /// testing part///
-  if(test != digitalRead(CONTROLLINO_A9)){
-    test =! test;
+  if (shutters.test != digitalRead(CONTROLLINO_A9))
+  {
+    shutters.test = !shutters.test;
   };
-  if (millis() - timmer >= 5000){
-    digitalWrite(CONTROLLINO_D16,!test);
-    timmer = millis();
+  if (millis() - shutters.timmer >= 5000)
+  {
+    digitalWrite(CONTROLLINO_D16, !shutters.test);
+    shutters.timmer = millis();
   }
 }

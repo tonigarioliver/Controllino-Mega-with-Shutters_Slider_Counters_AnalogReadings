@@ -18,28 +18,28 @@ void pinSetupShutters()
     PCMSK2 |= B00111111; // Set PCINT16-23 (A8-A15) to trigger an interrupt on state change.
 }
 
-void timmershutterState(unsigned long &_timmershutters) // to check time is on high value each state
+void timmershutterState(Shutters &_shutters) // to check time is on high value each state
 {
-    if (millis() - _timmershutters >= SHUTTERS_DELAY)
+    if (millis() - _shutters.timmershutters >= SHUTTERS_DELAY)
     {
         for (int i = 0; i < NUM_SHUTTERS * 2; i++)
         {
             digitalWrite(CONTROLLINO_D0 + i, LOW);
         }
-        _timmershutters = millis();
+        _shutters.timmershutters = millis();
     }
 }
 
-bool checkShuttersState(volatile bool _AnalogState[], volatile bool _AnalogOldState[],bool _newstates[])
+bool checkShuttersState(Shutters &_shutters)
 {
     bool isnew = false;
     for (int i = 0; i < NUM_SHUTTERS; i++)
     {
-        if (_AnalogState[i] != _AnalogOldState[i])
+        if (_shutters.AnalogState[i] != _shutters.AnalogOldState[i])
         {
             isnew = true;
-            _newstates[i] = true;
-            _AnalogOldState[i] = _AnalogState[i];
+            _shutters.newstates[i] = true;
+            _shutters.AnalogOldState[i] = _shutters.AnalogState[i];
         }
     }
     return isnew;

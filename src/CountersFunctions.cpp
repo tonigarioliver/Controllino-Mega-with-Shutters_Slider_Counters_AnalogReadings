@@ -12,14 +12,14 @@ uint32_t smooth(int numcounter, Count &counters,AVGCount &avgcount)
     switch (numcounter)
     {
     case 0:
-        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage1[avgcount.readIndex[numcounter]];
-        // read the sensor:
+        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage1[avgcount.readIndex[numcounter]]; //deleting the previous value if is 0 is start nothign to delete 
+                                                                                                                          // the first time we fill the array:
         avgcount.movingaverage1[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
         // add value to total:
         avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage1[avgcount.readIndex[numcounter]];
         // handle index
         avgcount.readIndex[numcounter]++;
-        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
+        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter]) //checking if my reading has reach my limit of moving average
         {
             avgcount.readIndex[numcounter] = 0;
         }
@@ -70,7 +70,7 @@ uint32_t smooth(int numcounter, Count &counters,AVGCount &avgcount)
         break;
     }
     // calculate the average:
-    average = avgcount.total[numcounter] / avgcount.sizeavg[numcounter];
+    average = avgcount.total[numcounter] / avgcount.sizeavg[numcounter]; //computes average from all the previous divide by the size
 
     return average;
 }

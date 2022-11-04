@@ -35,8 +35,8 @@ struct AVGCount
   uint16_t movingaverage2[60];
   uint16_t movingaverage3[60];
   uint16_t movingaverage4[60];
-  uint16_t total[NUMCOUNTERS] = {0, 0, 0, 0}; 
-  uint16_t readIndex[NUMCOUNTERS] = {0, 0, 0, 0};
+  uint16_t total[NUMCOUNTERS] = {0, 0, 0, 0};  //array to fill with the sum of all current moving average to be divided by sizeavg
+  uint16_t readIndex[NUMCOUNTERS] = {0, 0, 0, 0}; //reading index old values
   uint16_t listfreqavg[NUMCOUNTERS] = {0, 0, 0, 0};  //freq average after smooth fucnton
 };
 
@@ -48,6 +48,16 @@ struct AnalogReadings
   float prevAnalogReadings[analogInputs] = {0, 0, 0, 0, 0, 0, 0, 0};
   float nowAnalogReadings[analogInputs] = {0, 0, 0, 0, 0, 0, 0, 0};
   uint16_t freqanalogread = 1000;
+};
+
+struct Shutters{
+  volatile bool AnalogState[NUM_SHUTTERS] = {LOW, LOW, LOW, LOW, LOW};
+  volatile bool AnalogOldState[NUM_SHUTTERS] = {LOW, LOW, LOW, LOW, LOW};
+  bool newstates[NUM_SHUTTERS] = {false,false,false,false,false};
+  int dir = 0;
+  unsigned long timmer = 0;
+  unsigned long timmershutters = 0;
+  int test = LOW;
 };
 struct Slider
 {
