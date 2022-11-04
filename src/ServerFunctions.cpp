@@ -5,7 +5,7 @@
 #include "CountersFunctions.h"
 
 ////////////////////////
-void parseResponse(int numservers, String queries[], String server_output[],AnalogReadings &_Analog, Count &counters,AVGCount &avgcount)
+void parseResponse(int numservers, String queries[], String server_output[],AnalogReadings &_Analog, Count &counters,AVGCount &avgcount,Slider &_filter)
 {
     for (int i = 0; i < numservers; i++)
     {
@@ -47,6 +47,16 @@ void parseResponse(int numservers, String queries[], String server_output[],Anal
                 {
                     server_output[i] = "<get,counter," + (String(num)) + ",avg," + String(avgcount.listfreqavg[num]) + ">" + "\n\r";
                 }
+            }else if (parameter == "slider")
+            {
+                if (feature == "status")
+                {
+                    server_output[i] = "<get,slider," + (String(num)) + ",status," + String(_filter.motionstatus) + ">" + "\r\n";
+                }
+                else if (feature == "position")
+                {
+                    server_output[i] = "<get,slider," + (String(num)) + ",position," + String(_filter.nextposition) + ">" + "\r\n";
+                }
             }
         }
         else if (action == "set")
@@ -56,8 +66,12 @@ void parseResponse(int numservers, String queries[], String server_output[],Anal
                 command = strtok(NULL, ",");
                 _Analog.freqanalogread = String(command).toInt();
                 server_output[i] = "<set,analog," + (String(num)) + ",avg," + String(_Analog.freqanalogread) + ">" + "\n\r";
-            }
-            else if (parameter == "counter")
+            }else if (parameter == "slider")
+            {
+                command = strtok(NULL, ",");
+                _filter.nextposition = String(command).toInt();
+                server_output[i] = "<set,slider," + (String(num)) + ",position," + String(_filter.nextposition) + ">" + "\r\n";
+            }else if (parameter == "counter")
             {
                 switch (num)
                 {

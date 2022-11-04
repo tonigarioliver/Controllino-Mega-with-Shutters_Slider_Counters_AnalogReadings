@@ -7,6 +7,8 @@
 #include "ServerFunctions.h"
 #include <EthernetServers.h>
 #include "CountersFunctions.h"
+#include "ShuttersFunctions.h"
+#include "SliderFunctions.h"
 
 
 ////////////////Ethernet MAC for DHCP
@@ -27,16 +29,27 @@ Count Counters;
 ///Struct for Moving Average for Counters
 AVGCount avgCounters;
 
+// Struct shutters
+
+/// Struct slider
+Slider SliderFilter;
+
 /////InterruptionCounters
 const byte count1 = CONTROLLINO_IN0;
 const byte count2 = CONTROLLINO_IN1;
 const byte count3 = CONTROLLINO_PIN_HEADER_SCL;
 const byte count4 = CONTROLLINO_PIN_HEADER_SDA;
+/**testing*/
+const byte pulse1 = CONTROLLINO_D15;
+////////////////////////////////////////////////////////////////
+volatile bool AnalogState[NUM_SHUTTERS] = {LOW, LOW, LOW, LOW, LOW};
+volatile bool AnalogOldState[NUM_SHUTTERS] = {LOW, LOW, LOW, LOW, LOW};
+bool newstates[NUM_SHUTTERS] = {false,false,false,false,false};
+int dir = 0;
+unsigned long timmer = 0;
+unsigned long timmershutters = 0;
+int test = LOW;
 
-const byte pulse1 = CONTROLLINO_D2;
-const byte pulse2 = CONTROLLINO_D3;
-const byte pulse3 = CONTROLLINO_D4;
-const byte pulse4 = CONTROLLINO_D5;
 
 ///////////ISRs COUNTERS
 void counter1()
@@ -55,19 +68,25 @@ void counter4()
 {
   Counters.listpulses[3]++;
 }
-
-
+/////////////////////////////////////////
+ISR(PCINT2_vect)
+{
+  for (int i = 0; i < NUM_SHUTTERS; i++)
+  {
+    if (digitalRead(CONTROLLINO_A8 + i) != AnalogState[i])
+    {
+      // Pin D2 triggered the ISR on a Falling pulse
+      AnalogState[i] =! AnalogState[i];
+    }
+  }
+}
 /////////////////////////////////////////////////////////////////
 void setpulses(int dutycycle)
 {
   pinMode(pulse1, OUTPUT);
-  pinMode(pulse2, OUTPUT);
-  pinMode(pulse3, OUTPUT);
-  pinMode(pulse4, OUTPUT);
   analogWrite(pulse1, dutycycle);
-  analogWrite(pulse2, dutycycle);
-  analogWrite(pulse3, dutycycle);
-  analogWrite(pulse4, dutycycle);
+  pinMode(CONTROLLINO_D16, OUTPUT);
+  digitalWrite(CONTROLLINO_D16, HIGH);
 }
 ////////////////////////////////////////////
 void pinmodeCountersSetup()
@@ -91,6 +110,8 @@ void setup()
   delay(2000);
   pinmodeCountersSetup();
   pinmodeAnalogSetup();
+  pinSetupShutters();
+  pinmodeFiltersliderSetup();
   setpulses(DUTYCYCLE);
   Servers.startServers(servers, mac, ip);
   delay(2000);
@@ -102,40 +123,78 @@ void setup()
 
 void loop()
 {
+  SliderFilter.motionstatus = digitalRead(inMotion);
+  
   query = Servers.servermsgreceive(servers);
 
   if (Servers.existnewMessage())
   {
     delete[] serveroutput;
     serveroutput = new String[numServers];
-    parseResponse(numServers, query, serveroutput, Analog, Counters, avgCounters);
+    parseResponse(numServers, query, serveroutput, Analog, Counters, avgCounters,SliderFilter);
     Servers.sendreply(servers, serveroutput);
+    moveSliderFilter(SliderFilter);
   }
 
   readanaloginputs(Analog);
 
   if (millis() - Analog.timeanalog > Analog.freqanalogread)
   {
-    Analog.timeanalog = millis();
+    Serial.print("Average Analogs->");
     for (int i = 0; i < analogInputs; i++)
     {
       Analog.prevAnalogReadings[i] = (Analog.AnalogReadings[i]) / Analog.numAnalogReadings;
-      Serial.println(Analog.prevAnalogReadings[i]);
+      Serial.print("Analog num "+String(i)+": "+Analog.prevAnalogReadings[i]+" ");
       Analog.AnalogReadings[i] = 0;
     }
+    Serial.println();
     Analog.numAnalogReadings = 0;
+    Analog.timeanalog = millis();
   }
 
   if (millis() - Counters.timmerfreq > timefreq)
   {
-    Counters.timmerfreq = millis();
     Ethernet.maintain();
+    Serial.print("Average frequencies->");
     for (int i = 0; i < NUMCOUNTERS; i++)
     {
       Counters.listfreq[i] = uint16_t((Counters.listpulses[i] - Counters.listpulses_before[i]));
       Counters.listpulses_before[i] = Counters.listpulses[i];
       avgCounters.listfreqavg[i] = smooth(i, Counters, avgCounters);
-      Serial.println(avgCounters.listfreqavg[i]);
+      Serial.print("Counter num "+String(i)+": "+avgCounters.listfreqavg[i] +" ");
     }
+    Serial.println();
+    Counters.timmerfreq = millis();
+  }
+
+  timmershutterState(timmershutters);                                      // to check high output state
+  bool newupdateShutter = checkShuttersState(AnalogState, AnalogOldState,newstates); // new updates
+  if (newupdateShutter)
+  {
+    for (int i = 0; i < NUM_SHUTTERS; i++)
+    {
+      if (newstates[i] == true)
+      {
+        newstates[i] = false;
+        if(AnalogOldState[i] == HIGH)
+        {
+          moveShutter(i, FORWARDS);
+        }
+        else
+        {
+          moveShutter(i, BACKWARDS);
+        }
+        Serial.print("Value shutter first"+ String(i)+":" +String(digitalRead(CONTROLLINO_D0 + i)));
+        Serial.println("Value shutter second"+ String(i)+":" +String(digitalRead(CONTROLLINO_D0 + i+1)));
+      }
+    }
+  }
+  /// testing part///
+  if(test != digitalRead(CONTROLLINO_A9)){
+    test =! test;
+  };
+  if (millis() - timmer >= 5000){
+    digitalWrite(CONTROLLINO_D16,!test);
+    timmer = millis();
   }
 }
