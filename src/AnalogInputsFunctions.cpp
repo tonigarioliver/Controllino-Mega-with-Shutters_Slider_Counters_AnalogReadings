@@ -3,18 +3,17 @@
 #include "AnalogInputsFunctions.h"
 
 /////////////////////////////////////////////////////////////////////////////
-void readanaloginputs(float nowAnalogReadings[], uint32_t &numAnalogReadings, float AnalogReadings[])
+void readanaloginputs(AnalogReadings &_Analog)
 {
     for (int i = 0; i < analogInputs; i++)
     {
-        nowAnalogReadings[i] = (analogRead(CONTROLLINO_A0 + i) * voltatgeSupply);
-        AnalogReadings[i] = AnalogReadings[i] + nowAnalogReadings[i];
+        _Analog.nowAnalogReadings[i] = (analogRead(CONTROLLINO_A0 + i) * voltatgeSupply);
+        _Analog.AnalogReadings[i] = _Analog.AnalogReadings[i] + _Analog.nowAnalogReadings[i];
     }
-    numAnalogReadings = numAnalogReadings + 1;
+    _Analog.numAnalogReadings = _Analog.numAnalogReadings + 1;
 }
 
-uint32_t smooth(int numcounter, uint16_t sizeavg[], uint16_t readIndex[], uint16_t total[], uint16_t listfreq[],
-            uint16_t movingaverage1[], uint16_t movingaverage2[], uint16_t movingaverage3[], uint16_t movingaverage4[], uint16_t movingaverage5[], uint16_t movingaverage6[])
+uint32_t smooth(int numcounter, Count &counters,AVGCount &avgcount)
 { /* function smooth */
     ////Perform average on sensor readings
     uint32_t average;
@@ -22,86 +21,86 @@ uint32_t smooth(int numcounter, uint16_t sizeavg[], uint16_t readIndex[], uint16
     switch (numcounter)
     {
     case 0:
-        total[numcounter] = total[numcounter] - movingaverage1[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage1[avgcount.readIndex[numcounter]];
         // read the sensor:
-        movingaverage1[readIndex[numcounter]] = listfreq[numcounter];
+        avgcount.movingaverage1[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
         // add value to total:
-        total[numcounter] = total[numcounter] + movingaverage1[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage1[avgcount.readIndex[numcounter]];
         // handle index
-        readIndex[numcounter]++;
-        if (readIndex[numcounter] >= sizeavg[numcounter])
+        avgcount.readIndex[numcounter]++;
+        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
         {
-            readIndex[numcounter] = 0;
+            avgcount.readIndex[numcounter] = 0;
         }
         break;
 
     case 1:
-        total[numcounter] = total[numcounter] - movingaverage2[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage2[avgcount.readIndex[numcounter]];
         // read the sensor:
-        movingaverage2[readIndex[numcounter]] = listfreq[numcounter];
+        avgcount.movingaverage2[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
         // add value to total:
-        total[numcounter] = total[numcounter] + movingaverage2[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage2[avgcount.readIndex[numcounter]];
         // handle index
-        readIndex[numcounter]++;
-        if (readIndex[numcounter] >= sizeavg[numcounter])
+        avgcount.readIndex[numcounter]++;
+        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
         {
-            readIndex[numcounter] = 0;
+            avgcount.readIndex[numcounter] = 0;
         }
         break;
 
     case 2:
-        total[numcounter] = total[numcounter] - movingaverage3[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage3[avgcount.readIndex[numcounter]];
         // read the sensor:
-        movingaverage3[readIndex[numcounter]] = listfreq[numcounter];
+        avgcount.movingaverage3[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
         // add value to total:
-        total[numcounter] = total[numcounter] + movingaverage3[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage3[avgcount.readIndex[numcounter]];
         // handle index
-        readIndex[numcounter]++;
-        if (readIndex[numcounter] >= sizeavg[numcounter])
+        avgcount.readIndex[numcounter]++;
+        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
         {
-            readIndex[numcounter] = 0;
+            avgcount.readIndex[numcounter] = 0;
         }
         break;
 
     case 3:
-        total[numcounter] = total[numcounter] - movingaverage4[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage4[avgcount.readIndex[numcounter]];
         // read the sensor:
-        movingaverage4[readIndex[numcounter]] = listfreq[numcounter];
+        avgcount.movingaverage4[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
         // add value to total:
-        total[numcounter] = total[numcounter] + movingaverage4[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage4[avgcount.readIndex[numcounter]];
         // handle index
-        readIndex[numcounter]++;
-        if (readIndex[numcounter] >= sizeavg[numcounter])
+        avgcount.readIndex[numcounter]++;
+        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
         {
-            readIndex[numcounter] = 0;
+            avgcount.readIndex[numcounter] = 0;
         }
         break;
 
     case 4:
-        total[numcounter] = total[numcounter] - movingaverage5[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage5[avgcount.readIndex[numcounter]];
         // read the sensor:
-        movingaverage5[readIndex[numcounter]] = listfreq[numcounter];
+        avgcount.movingaverage5[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
         // add value to total:
-        total[numcounter] = total[numcounter] + movingaverage5[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage5[avgcount.readIndex[numcounter]];
         // handle index
-        readIndex[numcounter]++;
-        if (readIndex[numcounter] >= sizeavg[numcounter])
+        avgcount.readIndex[numcounter]++;
+        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
         {
-            readIndex[numcounter] = 0;
+            avgcount.readIndex[numcounter] = 0;
         }
         break;
 
     case 5:
-        total[numcounter] = total[numcounter] - movingaverage6[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] - avgcount.movingaverage6[avgcount.readIndex[numcounter]];
         // read the sensor:
-        movingaverage6[readIndex[numcounter]] = listfreq[numcounter];
+        avgcount.movingaverage6[avgcount.readIndex[numcounter]] = counters.listfreq[numcounter];
         // add value to total:
-        total[numcounter] = total[numcounter] + movingaverage6[readIndex[numcounter]];
+        avgcount.total[numcounter] = avgcount.total[numcounter] + avgcount.movingaverage6[avgcount.readIndex[numcounter]];
         // handle index
-        readIndex[numcounter]++;
-        if (readIndex[numcounter] >= sizeavg[numcounter])
+        avgcount.readIndex[numcounter]++;
+        if (avgcount.readIndex[numcounter] >= avgcount.sizeavg[numcounter])
         {
-            readIndex[numcounter] = 0;
+            avgcount.readIndex[numcounter] = 0;
         }
         break;
 
@@ -109,7 +108,7 @@ uint32_t smooth(int numcounter, uint16_t sizeavg[], uint16_t readIndex[], uint16
         break;
     }
     // calculate the average:
-    average = total[numcounter] / sizeavg[numcounter];
+    average = avgcount.total[numcounter] / avgcount.sizeavg[numcounter];
 
     return average;
 }

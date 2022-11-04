@@ -4,68 +4,67 @@
 #include "ServerFunctions.h"
 
 ////////////////////////
-void setmovingavg(int numcounter, uint16_t sizeavg[], uint16_t readIndex[], uint16_t total[],
-                  uint16_t movingaverage1[], uint16_t movingaverage2[], uint16_t movingaverage3[], uint16_t movingaverage4[], uint16_t movingaverage5[], uint16_t movingaverage6[])
+void setmovingavg(int numcounter,AVGCount &avgcount)
 {
     switch (numcounter)
     {
     case 0:
-        sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        readIndex[numcounter] = 0;
-        total[numcounter] = 0;
-        for (long i = 0; i < sizeavg[numcounter]; i++)
+        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
+        avgcount.readIndex[numcounter] = 0;
+        avgcount.total[numcounter] = 0;
+        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
         {
-            movingaverage1[i] = 0;
+            avgcount.movingaverage1[i] = 0;
         }
         break;
 
     case 1:
-        sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        readIndex[numcounter] = 0;
-        total[numcounter] = 0;
-        for (long i = 0; i < sizeavg[numcounter]; i++)
+        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
+        avgcount.readIndex[numcounter] = 0;
+        avgcount.total[numcounter] = 0;
+        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
         {
-            movingaverage2[i] = 0;
+            avgcount.movingaverage2[i] = 0;
         }
         break;
 
     case 2:
-        sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        readIndex[numcounter] = 0;
-        total[numcounter] = 0;
-        for (long i = 0; i < sizeavg[numcounter]; i++)
+        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
+        avgcount.readIndex[numcounter] = 0;
+        avgcount.total[numcounter] = 0;
+        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
         {
-            movingaverage3[i] = 0;
+            avgcount.movingaverage3[i] = 0;
         }
         break;
 
     case 3:
-        sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        readIndex[numcounter] = 0;
-        total[numcounter] = 0;
-        for (long i = 0; i < sizeavg[numcounter]; i++)
+        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
+        avgcount.readIndex[numcounter] = 0;
+        avgcount.total[numcounter] = 0;
+        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
         {
-            movingaverage4[i] = 0;
+            avgcount.movingaverage4[i] = 0;
         }
         break;
 
     case 4:
-        sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        readIndex[numcounter] = 0;
-        total[numcounter] = 0;
-        for (long i = 0; i < sizeavg[numcounter]; i++)
+        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
+        avgcount.readIndex[numcounter] = 0;
+        avgcount.total[numcounter] = 0;
+        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
         {
-            movingaverage5[i] = 0;
+            avgcount.movingaverage5[i] = 0;
         }
         break;
 
     case 5:
-        sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
-        readIndex[numcounter] = 0;
-        total[numcounter] = 0;
-        for (long i = 0; i < sizeavg[numcounter]; i++)
+        avgcount.sizeavg[numcounter] = EEPROMReadlong(longEEPROM * numcounter);
+        avgcount.readIndex[numcounter] = 0;
+        avgcount.total[numcounter] = 0;
+        for (int i = 0; i < avgcount.sizeavg[numcounter]; i++)
         {
-            movingaverage6[i] = 0;
+            avgcount.movingaverage6[i] = 0;
         }
         break;
 
@@ -74,9 +73,7 @@ void setmovingavg(int numcounter, uint16_t sizeavg[], uint16_t readIndex[], uint
     }
 }
 
-void parseResponse(int numservers, String queries[], String server_output[], float prevAnalogReadings[], float nowAnalogReadings[], uint16_t readIndex[], uint16_t total[],
-                   uint32_t &freqanalogread, unsigned long listpulses[], uint16_t listfreq[], uint16_t listfreqavg[], uint16_t sizeavg[],
-                   uint16_t movingaverage1[], uint16_t movingaverage2[], uint16_t movingaverage3[], uint16_t movingaverage4[], uint16_t movingaverage5[], uint16_t movingaverage6[])
+void parseResponse(int numservers, String queries[], String server_output[],AnalogReadings &_Analog, Count &counters,AVGCount &avgcount)
 {
     for (int i = 0; i < numservers; i++)
     {
@@ -97,26 +94,26 @@ void parseResponse(int numservers, String queries[], String server_output[], flo
             {
                 if (feature == "avg")
                 {
-                    server_output[i] = "<get,analog," + (String(num)) + ",avg," + String(prevAnalogReadings[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,analog," + (String(num)) + ",avg," + String(_Analog.prevAnalogReadings[num]) + ">" + "\n\r";
                 }
                 else if (feature == "now")
                 {
-                    server_output[i] = "<get,analog," + (String(num)) + ",now," + String(nowAnalogReadings[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,analog," + (String(num)) + ",now," + String(_Analog.nowAnalogReadings[num]) + ">" + "\n\r";
                 }
             }
             else if (parameter == "counter")
             {
                 if (feature == "pulses")
                 {
-                    server_output[i] = "<get,counter," + (String(num)) + ",pulses," + String(listpulses[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,counter," + (String(num)) + ",pulses," + String(counters.listpulses[num]) + ">" + "\n\r";
                 }
                 else if (feature == "freq")
                 {
-                    server_output[i] = "<get,counter," + (String(num)) + ",freq," + String(listfreq[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,counter," + (String(num)) + ",freq," + String(counters.listfreq[num]) + ">" + "\n\r";
                 }
                 else if (feature == "avg")
                 {
-                    server_output[i] = "<get,counter," + (String(num)) + ",avg," + String(listfreqavg[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,counter," + (String(num)) + ",avg," + String(avgcount.listfreqavg[num]) + ">" + "\n\r";
                 }
             }
         }
@@ -125,8 +122,8 @@ void parseResponse(int numservers, String queries[], String server_output[], flo
             if (parameter == "analog")
             {
                 command = strtok(NULL, ",");
-                freqanalogread = String(command).toInt();
-                server_output[i] = "<set,analog," + (String(num)) + ",avg," + String(freqanalogread) + ">" + "\n\r";
+                _Analog.freqanalogread = String(command).toInt();
+                server_output[i] = "<set,analog," + (String(num)) + ",avg," + String(_Analog.freqanalogread) + ">" + "\n\r";
             }
             else if (parameter == "counter")
             {
@@ -134,50 +131,50 @@ void parseResponse(int numservers, String queries[], String server_output[], flo
                 {
                 case 0:
                     command = strtok(NULL, ",");
-                    sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, sizeavg[num]);
-                    setmovingavg(num, sizeavg, readIndex, total, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+                    avgcount.sizeavg[num] = String(command).toInt();
+                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
+                    setmovingavg(num,avgcount);
                     break;
 
                 case 1:
                     command = strtok(NULL, ",");
-                    sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, sizeavg[num]);
-                    setmovingavg(num, sizeavg, readIndex, total, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+                    avgcount.sizeavg[num] = String(command).toInt();
+                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
+                    setmovingavg(num,avgcount);
                     break;
 
                 case 2:
                     command = strtok(NULL, ",");
-                    sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, sizeavg[num]);
-                    setmovingavg(num, sizeavg, readIndex, total, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+                    avgcount.sizeavg[num] = String(command).toInt();
+                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
+                    setmovingavg(num,avgcount);
                     break;
 
                 case 3:
                     command = strtok(NULL, ",");
-                    sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, sizeavg[num]);
-                    setmovingavg(num, sizeavg, readIndex, total, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+                    avgcount.sizeavg[num] = String(command).toInt();
+                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
+                    setmovingavg(num,avgcount);
                     break;
 
                 case 4:
                     command = strtok(NULL, ",");
-                    sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, sizeavg[num]);
-                    setmovingavg(num, sizeavg, readIndex, total, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+                    avgcount.sizeavg[num] = String(command).toInt();
+                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
+                    setmovingavg(num,avgcount);
                     break;
 
                 case 5:
-                    command = strtok(NULL, ",");
-                    sizeavg[num] = String(command).toInt();
-                    EEPROMWritelong(longEEPROM * num, sizeavg[num]);
-                    setmovingavg(num, sizeavg, readIndex, total, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+                     command = strtok(NULL, ",");
+                    avgcount.sizeavg[num] = String(command).toInt();
+                    EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
+                    setmovingavg(num,avgcount);
                     break;
 
                 default:
                     break;
                 }
-                server_output[i] = "<set,counter," + (String(num)) + ",avg," + String(sizeavg[num]) + ">" + "\n\r";
+                server_output[i] = "<set,counter," + (String(num)) + ",avg," + String(avgcount.sizeavg[num]) + ">" + "\n\r";
             }
         }
     }

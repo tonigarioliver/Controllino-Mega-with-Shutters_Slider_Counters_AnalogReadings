@@ -18,13 +18,8 @@ int numServers = sizeof(servers) / sizeof(servers[0]);
 EthernetServers Servers(buffersize, numServers);
 String *serveroutput;
 
-///// AnalogReadings
-unsigned long timeanalog = 0;
-uint32_t numAnalogReadings = 0;
-float AnalogReadings[analogInputs] = {0, 0, 0, 0, 0, 0, 0, 0};
-float prevAnalogReadings[analogInputs] = {0, 0, 0, 0, 0, 0, 0, 0};
-float nowAnalogReadings[analogInputs] = {0, 0, 0, 0, 0, 0, 0, 0};
-uint32_t freqanalogread = 1000;
+///// AnalogReadings 
+AnalogReadings Analog;
 
 /////InterruptionCounters
 const byte count1 = CONTROLLINO_IN0;
@@ -41,47 +36,36 @@ const byte pulse4 = CONTROLLINO_D5;
 const byte pulse5 = CONTROLLINO_D6;
 const byte pulse6 = CONTROLLINO_D7;
 
-///////////////Moving Average
-uint16_t sizeavg[NUMCOUNTERS] = {10, 10, 10, 10, 10, 10};
-uint16_t movingaverage1[60];
-uint16_t movingaverage2[60];
-uint16_t movingaverage3[60];
-uint16_t movingaverage4[60];
-uint16_t movingaverage5[60];
-uint16_t movingaverage6[60];
-////Pulse Counter
-unsigned long listpulses[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-unsigned long listpulses_before[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-uint16_t listfreq[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-unsigned long timmerfreq = 0;
 
-uint16_t total[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-uint16_t readIndex[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
-uint16_t listfreqavg[NUMCOUNTERS] = {0, 0, 0, 0, 0, 0};
+////Struct for Pulse Counter
+Count Counters;
+
+///Struct for Moving Average for Counters
+AVGCount avgCounters;
 ///////////ISRs COUNTERS
 void counter1()
 {
-  listpulses[0]++;
+  Counters.listpulses[0]++;
 }
 void counter2()
 {
-  listpulses[1]++;
+  Counters.listpulses[1]++;
 }
 void counter3()
 {
-  listpulses[2]++;
+  Counters.listpulses[2]++;
 }
 void counter4()
 {
-  listpulses[3]++;
+  Counters.listpulses[3]++;
 }
 void counter5()
 {
-  listpulses[4]++;
+  Counters.listpulses[4]++;
 }
 void counter6()
 {
-  listpulses[5]++;
+  Counters.listpulses[5]++;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -139,7 +123,7 @@ void setup()
   delay(2000);
   for (int i = 0; i < NUMCOUNTERS; i++)
   {
-    setmovingavg(i, sizeavg, readIndex, total, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+    setmovingavg(i, avgCounters);
   }
 }
 
@@ -151,35 +135,34 @@ void loop()
   {
     delete[] serveroutput;
     serveroutput = new String[numServers];
-    parseResponse(numServers, query, serveroutput, prevAnalogReadings, nowAnalogReadings, readIndex, total, freqanalogread, listpulses, listfreq, listfreqavg,
-                  sizeavg, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
+    parseResponse(numServers, query, serveroutput, Analog, Counters, avgCounters);
     Servers.sendreply(servers, serveroutput);
   }
 
-  readanaloginputs(nowAnalogReadings, numAnalogReadings, AnalogReadings);
+  readanaloginputs(Analog);
 
-  if (millis() - timeanalog > freqanalogread)
+  if (millis() - Analog.timeanalog > Analog.freqanalogread)
   {
-    timeanalog = millis();
+    Analog.timeanalog = millis();
     for (int i = 0; i < analogInputs; i++)
     {
-      prevAnalogReadings[i] = (AnalogReadings[i]) / numAnalogReadings;
-      Serial.println(prevAnalogReadings[i]);
-      AnalogReadings[i] = 0;
+      Analog.prevAnalogReadings[i] = (Analog.AnalogReadings[i]) / Analog.numAnalogReadings;
+      Serial.println(Analog.prevAnalogReadings[i]);
+      Analog.AnalogReadings[i] = 0;
     }
-    numAnalogReadings = 0;
+    Analog.numAnalogReadings = 0;
   }
 
-  if (millis() - timmerfreq > timefreq)
+  if (millis() - Counters.timmerfreq > timefreq)
   {
-    timmerfreq = millis();
+    Counters.timmerfreq = millis();
     Ethernet.maintain();
     for (int i = 0; i < NUMCOUNTERS; i++)
     {
-      listfreq[i] = uint16_t((listpulses[i] - listpulses_before[i]));
-      listpulses_before[i] = listpulses[i];
-      listfreqavg[i] = smooth(i, sizeavg, readIndex, total, listfreq, movingaverage1, movingaverage2, movingaverage3, movingaverage4, movingaverage5, movingaverage6);
-      Serial.println(listfreqavg[i]);
+      Counters.listfreq[i] = uint16_t((Counters.listpulses[i] - Counters.listpulses_before[i]));
+      Counters.listpulses_before[i] = Counters.listpulses[i];
+      avgCounters.listfreqavg[i] = smooth(i, Counters, avgCounters);
+      Serial.println(avgCounters.listfreqavg[i]);
     }
   }
 }
