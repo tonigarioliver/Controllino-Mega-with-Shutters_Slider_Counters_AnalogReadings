@@ -147,6 +147,7 @@ void loop()
   };
   if (millis() - shutters.timmer >= 5000)
   {
+    Ethernet.maintain();
     digitalWrite(CONTROLLINO_D16, !shutters.test);
     shutters.timmer = millis();
   }

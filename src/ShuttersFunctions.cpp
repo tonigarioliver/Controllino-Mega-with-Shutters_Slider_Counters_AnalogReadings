@@ -80,8 +80,8 @@ void moveShutters(Shutters &_shutters)
             {
                 moveShutter(i, BACKWARDS);
             }
-            Serial.print("Value shutter first" + String(i) + ":" + String(digitalRead(FIRST_SHUTTER_OUT + i)));
-            Serial.println("Value shutter second" + String(i) + ":" + String(digitalRead(FIRST_SHUTTER_OUT + i + 1)));
+            //Serial.print("Value shutter first" + String(i) + ":" + String(digitalRead(FIRST_SHUTTER_OUT + i)));
+            //Serial.println("Value shutter second" + String(i) + ":" + String(digitalRead(FIRST_SHUTTER_OUT + i + 1)));
         }
     }
 }

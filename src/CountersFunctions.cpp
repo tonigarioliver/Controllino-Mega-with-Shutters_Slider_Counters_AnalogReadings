@@ -7,15 +7,15 @@ void countersAVG(Count &counters,AVGCount &avgcount){
   if (millis() - counters.timmerfreq > timefreq)
   {
     //Ethernet.maintain();
-    Serial.print("Average frequencies->");
+    //Serial.print("Average frequencies->");
     for (int i = 0; i < NUMCOUNTERS; i++)
     {
       counters.listfreq[i] = uint16_t((counters.listpulses[i] - counters.listpulses_before[i]));
       counters.listpulses_before[i] = counters.listpulses[i];
       avgcount.listfreqavg[i] = smoothCounterFrequencies(i, counters, avgcount);
-      Serial.print("Counter num " + String(i) + ": " + avgcount.listfreqavg[i] + " ");
+      //Serial.print("Counter num " + String(i) + ": " + avgcount.listfreqavg[i] + " ");
     }
-    Serial.println();
+    //Serial.println();
     counters.timmerfreq = millis();
   }
 }

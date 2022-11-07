@@ -26,14 +26,14 @@ void pinmodeAnalogSetup(){
 void analogAVG(AnalogReadings &_Analog){
   if (millis() - _Analog.timeanalog > _Analog.freqanalogread)
   {
-    Serial.print("Average Analogs->");
+    //Serial.print("Average Analogs->");
     for (int i = 0; i < analogInputs; i++)
     {
       _Analog.prevAnalogReadings[i] = (_Analog.AnalogReadings[i]) / _Analog.numAnalogReadings;
-      Serial.print("Analog num " + String(i) + ": " + _Analog.prevAnalogReadings[i] + " ");
+      //Serial.print("Analog num " + String(i) + ": " + _Analog.prevAnalogReadings[i] + " ");
       _Analog.AnalogReadings[i] = 0;
     }
-    Serial.println();
+    //Serial.println();
     _Analog.numAnalogReadings = 0;
     _Analog.timeanalog = millis();
   }

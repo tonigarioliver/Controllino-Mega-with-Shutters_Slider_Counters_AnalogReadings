@@ -16,7 +16,7 @@
 #define FIRST_SHUTTER_IN CONTROLLINO_A8
 #define timmerdelay 5000
 #define NUM_SHUTTERS 5
-#define SHUTTERS_DELAY_STATE 500 // time on each state of the shutter
+#define SHUTTERS_DELAY_STATE 700 // time on each state of the shutter
 enum shutter_direction
 {
   BACKWARDS,
