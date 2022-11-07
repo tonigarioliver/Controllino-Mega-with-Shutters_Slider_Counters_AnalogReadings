@@ -98,6 +98,7 @@ void pinmodeCountersSetup()
 void setup()
 {
   Serial.begin(115200);
+  Serial2.begin(9600);
   delay(2000);
   pinmodeCountersSetup();
   pinmodeAnalogSetup();
@@ -115,7 +116,7 @@ void setup()
 void loop()
 {
   SliderFilter.motionstatus = digitalRead(inMotion);
-
+  timmingQuerySlider(SliderFilter);
   query = Servers.servermsgreceive(servers);
 
   if (Servers.existnewMessage())
@@ -130,15 +131,15 @@ void loop()
   readanaloginputs(Analog);
   analogAVG(Analog);
 
-  countersAVG(Counters,avgCounters);
+  countersAVG(Counters, avgCounters);
 
-  timmershutterState(shutters);                         // to check high output state
-   // new updates
+  timmershutterState(shutters); // to check high output state
+                                // new updates
   if (checkShuttersState(shutters))
   {
     moveShutters(shutters);
   }
-  
+
   /// testing part///
   if (shutters.test != digitalRead(CONTROLLINO_A9))
   {
