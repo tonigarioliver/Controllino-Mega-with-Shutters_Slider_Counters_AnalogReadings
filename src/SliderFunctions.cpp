@@ -2,14 +2,25 @@
 #include "define.h"
 #include "SliderFunctions.h"
 
-void pinmodeFiltersliderSetup()
+void pinmodeFiltersliderSetup(Slider &_filter)
 {
+  pinMode(TRIGGER_MOVE_PIN,INPUT);
   pinMode(inMotion, INPUT_PULLUP);
   pinMode(backward, OUTPUT);
   pinMode(forward, OUTPUT);
   digitalWrite(backward, HIGH);
   digitalWrite(forward, HIGH);
-};
+  _filter.currentPosition=digitalRead(TRIGGER_MOVE_PIN);
+  _filter.oldPosition=digitalRead(TRIGGER_MOVE_PIN);
+}
+
+void ISRSlider(Slider &_filter){
+  if (digitalRead(TRIGGER_MOVE_PIN) != _filter.oldPosition)
+  {
+    // Pin D2 triggered the ISR on a Falling pulse
+    _filter.currentPosition =! _filter.oldPosition;
+  }
+}
 
 void moveSliderFilter(Slider &_filter)
 {
@@ -23,7 +34,7 @@ void moveSliderFilter(Slider &_filter)
     digitalWrite(backward, HIGH);
     digitalWrite(forward, LOW);
   }
-};
+}
 
 void timmingQuerySlider(Slider &_filter) // to check time is on high value each state
 {

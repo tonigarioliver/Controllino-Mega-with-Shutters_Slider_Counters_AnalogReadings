@@ -20,6 +20,7 @@ EthernetServer servers[] = {EthernetServer(80), EthernetServer(8080), EthernetSe
 int numServers = sizeof(servers) / sizeof(servers[0]);
 EthernetServers Servers(buffersize, numServers);
 String *serveroutput;
+unsigned long ethernetTimmerkeepalive=0;
 
 ///// AnalogReadings
 AnalogReadings Analog;
@@ -62,14 +63,8 @@ void counter4()
 /////////////////////////////////////////
 ISR(PCINT2_vect)
 {
-  for (int i = 0; i < NUM_SHUTTERS; i++)
-  {
-    if (digitalRead(CONTROLLINO_A8 + i) != shutters.AnalogState[i])
-    {
-      // Pin D2 triggered the ISR on a Falling pulse
-      shutters.AnalogState[i] = !shutters.AnalogState[i];
-    }
-  }
+  ISRShutters(shutters);
+  ISRSlider(SliderFilter);
 }
 /////////////////////////////////////////////////////////////////
 void setpulses(int dutycycle)
@@ -102,8 +97,8 @@ void setup()
   delay(2000);
   pinmodeCountersSetup();
   pinmodeAnalogSetup();
-  pinSetupShutters();
-  pinmodeFiltersliderSetup();
+  pinSetupShutters(shutters);
+  pinmodeFiltersliderSetup(SliderFilter);
   setpulses(DUTYCYCLE);
   Servers.startServers(servers, mac, ip);
   delay(2000);
@@ -127,7 +122,11 @@ void loop()
     Servers.sendreply(servers, serveroutput);
     moveSliderFilter(SliderFilter);
   }
-
+  if(SliderFilter.currentPosition!=SliderFilter.oldPosition){
+    SliderFilter.nextposition=SliderFilter.currentPosition;
+    moveSliderFilter(SliderFilter);
+    SliderFilter.oldPosition=SliderFilter.currentPosition;
+  }
   readanaloginputs(Analog);
   analogAVG(Analog);
 
@@ -140,15 +139,8 @@ void loop()
     moveShutters(shutters);
   }
 
-  /// testing part///
-  if (shutters.test != digitalRead(CONTROLLINO_A9))
-  {
-    shutters.test = !shutters.test;
-  };
-  if (millis() - shutters.timmer >= 5000)
+  if (millis() - ethernetTimmerkeepalive >= 10000)
   {
     Ethernet.maintain();
-    digitalWrite(CONTROLLINO_D16, !shutters.test);
-    shutters.timmer = millis();
   }
 }

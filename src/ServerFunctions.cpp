@@ -26,26 +26,26 @@ void parseResponse(int numservers, String queries[], String server_output[], Ana
             {
                 if (feature == "avg")
                 {
-                    server_output[i] = "<get,analog," + (String(num)) + ",avg," + String(_Analog.prevAnalogReadings[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,analog," + (String(num)) + ",avg," + String(_Analog.prevAnalogReadings[num]) + ">";
                 }
                 else if (feature == "now")
                 {
-                    server_output[i] = "<get,analog," + (String(num)) + ",now," + String(_Analog.nowAnalogReadings[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,analog," + (String(num)) + ",now," + String(_Analog.nowAnalogReadings[num]) + ">";
                 }
             }
             else if (parameter == "counter")
             {
                 if (feature == "pulses")
                 {
-                    server_output[i] = "<get,counter," + (String(num)) + ",pulses," + String(counters.listpulses[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,counter," + (String(num)) + ",pulses," + String(counters.listpulses[num]) + ">";
                 }
                 else if (feature == "freq")
                 {
-                    server_output[i] = "<get,counter," + (String(num)) + ",freq," + String(counters.listfreq[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,counter," + (String(num)) + ",freq," + String(counters.listfreq[num]) + ">";
                 }
                 else if (feature == "avg")
                 {
-                    server_output[i] = "<get,counter," + (String(num)) + ",avg," + String(avgcount.listfreqavg[num]) + ">" + "\n\r";
+                    server_output[i] = "<get,counter," + (String(num)) + ",avg," + String(avgcount.listfreqavg[num]) + ">";
                 }
             }
             else if (parameter == "slider")
@@ -53,14 +53,14 @@ void parseResponse(int numservers, String queries[], String server_output[], Ana
                 if(_filter.error == false){
                     if (feature == "status")
                     {
-                        server_output[i] = "<get,slider," + (String(num)) + ",status," + String(_filter.motionstatus) + ">" + "\r\n";
+                        server_output[i] = "<get,slider," + (String(num)) + ",status," + String(_filter.motionstatus) + ">";
                     }
                     else if (feature == "position")
                     {
-                        server_output[i] = "<get,slider," + (String(num)) + ",position," + String(_filter.currentposition) + ">" + "\r\n";
+                        server_output[i] = "<get,slider," + (String(num)) + ",position," + String(_filter.currentposition) + ">";
                     }
                 }else{
-                    server_output[i] = "<Error in motion>\r\n";
+                    server_output[i] = "<Error in motion>";
                 }
             }
         }
@@ -70,16 +70,16 @@ void parseResponse(int numservers, String queries[], String server_output[], Ana
             {
                 command = strtok(NULL, ",");
                 _Analog.freqanalogread = String(command).toInt();
-                server_output[i] = "<set,analog," + (String(num)) + ",avg," + String(_Analog.freqanalogread) + ">" + "\n\r";
+                server_output[i] = "<set,analog," + (String(num)) + ",avg," + String(_Analog.freqanalogread) + ">";
             }
             else if (parameter == "slider")
             {
                 command = strtok(NULL, ",");
                 _filter.nextposition = String(command).toInt();
                 if(_filter.error == false){
-                    server_output[i] = "<set,slider," + (String(num)) + ",position," + String(_filter.nextposition) + ">" + "\r\n";
+                    server_output[i] = "<set,slider," + (String(num)) + ",position," + String(_filter.nextposition) + ">";
                 }else{
-                    server_output[i] = "<Error in motion>\r\n";
+                    server_output[i] = "<Error in motion>";
                 }
             }
             else if (parameter == "counter")
@@ -88,7 +88,7 @@ void parseResponse(int numservers, String queries[], String server_output[], Ana
                 avgcount.sizeavg[num] = String(command).toInt();
                 EEPROMWritelong(longEEPROM * num, avgcount.sizeavg[num]);
                 updatemovingavgArray(num, avgcount);
-                server_output[i] = "<set,counter," + (String(num)) + ",avg," + String(avgcount.sizeavg[num]) + ">" + "\n\r";
+                server_output[i] = "<set,counter," + (String(num)) + ",avg," + String(avgcount.sizeavg[num]) + ">";
             }
         }
     }

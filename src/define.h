@@ -10,13 +10,13 @@
 #define backward CONTROLLINO_D13
 #define forward CONTROLLINO_D14
 #define SLIDER_TIMEQUERY 100
+#define TRIGGER_MOVE_PIN CONTROLLINO_A13
 
 /// Shutters define
 #define FIRST_SHUTTER_OUT CONTROLLINO_D0
 #define FIRST_SHUTTER_IN CONTROLLINO_A8
-#define timmerdelay 5000
 #define NUM_SHUTTERS 5
-#define SHUTTERS_DELAY_STATE 700 // time on each state of the shutter
+#define SHUTTERS_DELAY_STATE 140 // time on each state of the shutter
 enum shutter_direction
 {
   BACKWARDS,
@@ -60,9 +60,7 @@ struct Shutters
   volatile bool AnalogOldState[NUM_SHUTTERS] = {LOW, LOW, LOW, LOW, LOW};
   bool newstates[NUM_SHUTTERS] = {false, false, false, false, false};
   int dir = 0;
-  unsigned long timmer = 0;
-  unsigned long timmershutters = 0;
-  int test = LOW;
+  unsigned long timmershutters[NUM_SHUTTERS] = {0,0,0,0,0};
 };
 struct Slider
 {
@@ -72,5 +70,8 @@ struct Slider
   String minposition = "0PO00000000\r\n";
   int currentposition = 0;
   unsigned long timmerslider = 0;
+  
   bool error = false;
+  volatile int currentPosition;
+  volatile int oldPosition;
 };

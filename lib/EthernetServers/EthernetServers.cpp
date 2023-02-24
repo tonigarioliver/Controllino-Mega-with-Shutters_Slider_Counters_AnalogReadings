@@ -95,7 +95,7 @@ void EthernetServers::sendreply(EthernetServer servers[], String reply[])
             EthernetClient client = servers[i].available();
             if (newData[i] == true)
             {
-                client.print(reply[i]);
+                client.println(reply[i]);
                 newData[i] = false;
             }
         }
